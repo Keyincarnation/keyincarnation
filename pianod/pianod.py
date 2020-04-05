@@ -14,7 +14,9 @@ class SelectSwitch:
       self.pins.insert(i , mcp.get_pin(i))
       self.pins[i].direction = digitalio.Direction.INPUT
       self.pins[i].pull = digitalio.Pull.UP
-    self.value = self.get_value
+      print(i)
+      print(self.pins[i].value)
+    self.value = self.get_value()
 
   def get_value(self):
     scanning = True
@@ -27,19 +29,18 @@ class SelectSwitch:
           selected = current_pin
           print("selected: " + str(selected))
           scanning = False
-        if current_pin < 12:
-          current_pin += 1
-        elif current_pin == 12:
-          current_pin = 0
+        # if current_pin < 12:
+      current_pin = current_pin + 1
+      if current_pin == 13:
+        current_pin = 0
     return selected
 
-  def detect_change(self):
-    changed = self.pins[self.selected].value
+  def update(self):
+    # changed = self.pins[self.value].value == self.value
+    changed = self.pins[self.value].value == self.value
+    if changed:
+      self.value = self.get_value()
     return changed
-
-  def set_value(self):
-    if self.detect_change:
-      self.value = self.get_value
 
 class BinarySwitch:
 
@@ -49,18 +50,16 @@ class BinarySwitch:
     self.switch.pull = digitalio.Pull.UP
     self.value = self.switch.value
   
-  def detect_change(self):
+  def update(self):
     changed = self.value != self.switch.value
+    if changed:
+      self.value = self.switch.value
     return changed
-
-  def set_value(self):
-    if self.detect_change:
-      self.value = self.get_value
 
 
 class MidiPort:
 
-  def __init__(self)
+  def __init__(self):
     self.midiout = rtmidi.MidiOut()
     self.midiout.open_virtual_port("PianoControl")
 
@@ -69,12 +68,31 @@ class MidiPort:
     self.midiout.send_message(midi_cmd)
 
 class PianoControl:
-  
+
   def __init__(self):
     self.i2c = busio.I2C(board.SCL, board.SDA)
     self.mcp = MCP23017(self.i2c)
     self.instrument_switch = SelectSwitch(self.mcp)
     self.effect1_switch = BinarySwitch(self.mcp,13)
     self.effect2_switch = BinarySwitch(self.mcp,14)
-    headphone_switch = BinarySwitch(self.mcp,15)
-    
+    self.headphone_switch = BinarySwitch(self.mcp,15)
+    self.instrument = self.instrument_switch.value
+    if self.headphone_switch.value:
+      self.instrument = self.instrument + 12
+
+  def check_instrument_change(self):
+    instrument_changed = self.instrument_switch.update()
+    headphone_changed = self.headphone_switch.update()
+    if instrument_changed or headphone_changed:
+      instrument = self.instrument_switch.value
+      if head_phone:
+        instrument = instrument + 12
+    changed = instrument != self.instrument
+    return changed
+   
+## Main routine
+
+piano = PianoControl()
+
+program = piano.check_instrument_change() 
+print(piano.instrument) 
