@@ -14,8 +14,6 @@ class SelectSwitch:
       self.pins.insert(i , mcp.get_pin(i))
       self.pins[i].direction = digitalio.Direction.INPUT
       self.pins[i].pull = digitalio.Pull.UP
-      print(i)
-      print(self.pins[i].value)
     self.value = self.get_value()
 
   def get_value(self):
@@ -31,13 +29,13 @@ class SelectSwitch:
           scanning = False
         # if current_pin < 12:
       current_pin = current_pin + 1
-      if current_pin == 13:
+      if current_pin == 12:
         current_pin = 0
     return selected
 
   def update(self):
     # changed = self.pins[self.value].value == self.value
-    changed = self.pins[self.value].value == self.value
+    changed = self.pins[self.value].value != False
     if changed:
       self.value = self.get_value()
     return changed
@@ -77,22 +75,24 @@ class PianoControl:
     self.effect2_switch = BinarySwitch(self.mcp,14)
     self.headphone_switch = BinarySwitch(self.mcp,15)
     self.instrument = self.instrument_switch.value
-    if self.headphone_switch.value:
-      self.instrument = self.instrument + 12
+    # if self.headphone_switch.value:
+    #  self.instrument = self.instrument + 12
 
   def check_instrument_change(self):
     instrument_changed = self.instrument_switch.update()
     headphone_changed = self.headphone_switch.update()
-    if instrument_changed or headphone_changed:
+    changed = instrument_changed or headphone_changed 
+    if changed:
       instrument = self.instrument_switch.value
-      if head_phone:
-        instrument = instrument + 12
-    changed = instrument != self.instrument
+      # if self.headphone_switch.value:
+        # instrument = instrument + 12
+      self.instrument = instrument
+      print(instrument)
     return changed
    
 ## Main routine
 
 piano = PianoControl()
 
-program = piano.check_instrument_change() 
-print(piano.instrument) 
+while True:
+  piano.check_instrument_change() 
