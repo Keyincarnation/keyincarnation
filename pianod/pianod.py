@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import time
 import rtmidi
 
@@ -61,7 +63,7 @@ class MidiPort:
     self.midiout = rtmidi.MidiOut()
     self.midiout.open_virtual_port("PianoControl")
 
-  def midi_send_program_change(self,program):
+  def program_change(self,program):
     midi_cmd = [0xC0, program]
     self.midiout.send_message(midi_cmd)
 
@@ -74,6 +76,7 @@ class PianoControl:
     self.effect1_switch = BinarySwitch(self.mcp,13)
     self.effect2_switch = BinarySwitch(self.mcp,14)
     self.headphone_switch = BinarySwitch(self.mcp,15)
+    self.midi = MidiPort()
     self.instrument = self.instrument_switch.value
     # if self.headphone_switch.value:
     #  self.instrument = self.instrument + 12
@@ -95,4 +98,10 @@ class PianoControl:
 piano = PianoControl()
 
 while True:
-  piano.check_instrument_change() 
+  instrument_changed = piano.check_instrument_change() 
+  if instrument_changed:
+    piano.midi.program_change(piano.instrument)
+    time.sleep(0.2)
+  else:
+    time.sleep(0.4)
+  

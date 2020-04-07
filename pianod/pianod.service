@@ -1,0 +1,15 @@
+[Unit]
+Description=Pianod
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+WorkingDirectory=/home/pi/keyincarnation/pianod
+ExecStart=/home/pi/keyincarnation/pianod/pianod.py
+User=pi
+RemainAfterExit=no
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
