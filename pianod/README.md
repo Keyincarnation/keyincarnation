@@ -6,9 +6,10 @@ A python deamon running on the Raspberry Pi to control extra features of the pia
 * Read the instrument selector switch, a 12-way rotary select switch.
 * Read basic on/off switches.
 * Send Midi program change messages.
+* Send Midi Control messages.
 
 ## Future features
-* Send Midi Control messages.
+* Read if headphone jack is connected and send different program changes.
 * Provide Home Assistant integration.
 
 ## Requirments
